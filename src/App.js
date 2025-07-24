@@ -8,7 +8,7 @@ const App = () => {
     const [coveredTaxCurrent, setCoveredTaxCurrent] = useState(0);
     const [coveredTaxDeferred, setCoveredTaxDeferred] = useState(0);
     const [excludedDividends, setExcludedDividends] = useState(0);
-    const [excludedEquityGainsLosses, setExcludedEquityGainsLosses] = useState(0);
+    const [excludedEquityGainsLosses, setExcludedExcludedEquityGainsLosses] = useState(0);
     const [nonDeductibleExpenses, setNonDeductibleExpenses] = useState(0);
     const [governmentFinesPenalties, setGovernmentFinesPenalties] = useState(0);
     const [fairValueAdjustments, setFairValueAdjustments] = useState(0);
@@ -26,23 +26,9 @@ const App = () => {
     const GLOBAL_MINIMUM_TAX_RATE = 0.15; // 15%
     const REVENUE_THRESHOLD_EUR = 750000000; // EUR 750 million (full value)
 
-    // Effect hook to recalculate whenever input values change
-    useEffect(() => {
-        calculateGMT();
-    }, [
-        netAccountingProfitLoss,
-        coveredTaxCurrent,
-        coveredTaxDeferred,
-        excludedDividends,
-        excludedEquityGainsLosses,
-        nonDeductibleExpenses,
-        governmentFinesPenalties,
-        fairValueAdjustments,
-        taxTransparentEntityIncome,
-        consolidatedRevenue // Consolidated revenue is now in full EUR for the threshold check
-    ]);
-
     // Function to perform the GMT calculation
+    // Moved inside useEffect or memoized if it depends on external state
+    // For simplicity, defining it inside the component and including it in deps
     const calculateGMT = () => {
         // Step 1: Check if the consolidated revenue threshold is met (now directly in full EUR)
         const thresholdMet = consolidatedRevenue >= REVENUE_THRESHOLD_EUR;
@@ -100,6 +86,24 @@ const App = () => {
         }
         setTopUpTax(calculatedTopUpTax);
     };
+
+    // Effect hook to recalculate whenever input values change
+    // Added calculateGMT to the dependency array to resolve the linter warning
+    useEffect(() => {
+        calculateGMT();
+    }, [
+        netAccountingProfitLoss,
+        coveredTaxCurrent,
+        coveredTaxDeferred,
+        excludedDividends,
+        excludedEquityGainsLosses,
+        nonDeductibleExpenses,
+        governmentFinesPenalties,
+        fairValueAdjustments,
+        taxTransparentEntityIncome,
+        consolidatedRevenue,
+        calculateGMT // Added calculateGMT here
+    ]);
 
     // Helper function to format numbers as currency (for IDR values)
     const formatCurrency = (value) => {
