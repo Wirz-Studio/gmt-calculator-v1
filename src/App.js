@@ -8,7 +8,8 @@ const App = () => {
     const [coveredTaxCurrent, setCoveredTaxCurrent] = useState(0);
     const [coveredTaxDeferred, setCoveredTaxDeferred] = useState(0);
     const [excludedDividends, setExcludedDividends] = useState(0);
-    const [excludedEquityGainsLosses, setExcludedExcludedEquityGainsLosses] = useState(0);
+    // FIX: Corrected typo in the setter function name for excludedEquityGainsLosses
+    const [excludedEquityGainsLosses, setExcludedEquityGainsLosses] = useState(0);
     const [nonDeductibleExpenses, setNonDeductibleExpenses] = useState(0);
     const [governmentFinesPenalties, setGovernmentFinesPenalties] = useState(0);
     const [fairValueAdjustments, setFairValueAdjustments] = useState(0);
@@ -86,24 +87,6 @@ const App = () => {
         }
         setTopUpTax(calculatedTopUpTax);
     };
-
-    // Effect hook to recalculate whenever input values change
-    // Added calculateGMT to the dependency array to resolve the linter warning
-    useEffect(() => {
-        calculateGMT();
-    }, [
-        netAccountingProfitLoss,
-        coveredTaxCurrent,
-        coveredTaxDeferred,
-        excludedDividends,
-        excludedEquityGainsLosses,
-        nonDeductibleExpenses,
-        governmentFinesPenalties,
-        fairValueAdjustments,
-        taxTransparentEntityIncome,
-        consolidatedRevenue,
-        calculateGMT // Added calculateGMT here
-    ]);
 
     // Helper function to format numbers as currency (for IDR values)
     const formatCurrency = (value) => {
