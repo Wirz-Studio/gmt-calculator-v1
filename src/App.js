@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
 
 // Main App component for the GMT Calculator
 const App = () => {
@@ -8,7 +8,6 @@ const App = () => {
     const [coveredTaxCurrent, setCoveredTaxCurrent] = useState(0);
     const [coveredTaxDeferred, setCoveredTaxDeferred] = useState(0);
     const [excludedDividends, setExcludedDividends] = useState(0);
-    // FIX: Corrected typo in the setter function name for excludedEquityGainsLosses
     const [excludedEquityGainsLosses, setExcludedEquityGainsLosses] = useState(0);
     const [nonDeductibleExpenses, setNonDeductibleExpenses] = useState(0);
     const [governmentFinesPenalties, setGovernmentFinesPenalties] = useState(0);
@@ -27,10 +26,8 @@ const App = () => {
     const GLOBAL_MINIMUM_TAX_RATE = 0.15; // 15%
     const REVENUE_THRESHOLD_EUR = 750000000; // EUR 750 million (full value)
 
-    // Function to perform the GMT calculation
-    // Moved inside useEffect or memoized if it depends on external state
-    // For simplicity, defining it inside the component and including it in deps
-    const calculateGMT = () => {
+    // Function to perform the GMT calculation, wrapped in useCallback
+    const calculateGMT = useCallback(() => {
         // Step 1: Check if the consolidated revenue threshold is met (now directly in full EUR)
         const thresholdMet = consolidatedRevenue >= REVENUE_THRESHOLD_EUR;
         setIsThresholdMet(thresholdMet);
@@ -86,7 +83,33 @@ const App = () => {
             calculatedTopUpTax = (GLOBAL_MINIMUM_TAX_RATE - calculatedETR) * calculatedGloBEIncomeLoss;
         }
         setTopUpTax(calculatedTopUpTax);
-    };
+    }, [
+        netAccountingProfitLoss,
+        coveredTaxCurrent,
+        coveredTaxDeferred,
+        excludedDividends,
+        excludedEquityGainsLosses,
+        nonDeductibleExpenses,
+        governmentFinesPenalties,
+        fairValueAdjustments,
+        taxTransparentEntityIncome,
+        consolidatedRevenue,
+        // Include setters in useCallback's dependency array if they are used to update state directly
+        // However, React guarantees setState functions are stable, so they typically don't need to be here.
+        // Adding them here just for exhaustive-deps linter if it still complains.
+        setIsThresholdMet,
+        setGloBEIncomeLoss,
+        setAdjustedCoveredTax,
+        setEffectiveTaxRate,
+        setTopUpTax
+    ]);
+
+
+    // Effect hook to recalculate whenever input values change
+    // calculateGMT is now a stable function due to useCallback
+    useEffect(() => {
+        calculateGMT();
+    }, [calculateGMT]); // Now only depends on the stable calculateGMT function
 
     // Helper function to format numbers as currency (for IDR values)
     const formatCurrency = (value) => {
